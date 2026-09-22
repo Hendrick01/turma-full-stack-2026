@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caderno do Fiado</title>
+<meta name="description" content="Aplicativo do fiado: a dona anota compras e pagamentos, o cliente confere saldo e extrato.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#EDF1F6;
+  --surface:#FFFFFF;
+  --surface-2:#F5F7FB;
+  --ink:#14213A;
+  --muted:#58657E;
+  --line:#D6DDE8;
+  --blue:#1E4D8C;
+  --on-blue:#FFFFFF;
+  --blue-soft:#E2EBF7;
+  --red:#B3322A;
+  --red-soft:#FBE8E5;
+  --green:#1D7447;
+  --on-green:#FFFFFF;
+  --green-soft:#E0F2E8;
+  --amber:#8F5700;
+  --amber-soft:#FDF0D6;
+  --paper:#FFFEF9;
+  --rule:#CFDCEE;
+  --margin:#E4A3A0;
+  --shadow:0 1px 2px rgba(20,33,58,.06),0 6px 18px rgba(20,33,58,.07);
+  --focus:#1E4D8C;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1523; --surface:#161F31; --surface-2:#1B2539; --ink:#E7EDF7; --muted:#9BA8BF; --line:#2A3651;
+    --blue:#86ADE8; --on-blue:#0E1523; --blue-soft:#1C2B46;
+    --red:#F2958A; --red-soft:#3A2023; --green:#72D3A0; --on-green:#0E1523; --green-soft:#153126;
+    --amber:#F1C36A; --amber-soft:#382C13; --paper:#172136; --rule:#243352; --margin:#7B3D3D;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 20px rgba(0,0,0,.25); --focus:#86ADE8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1523; --surface:#161F31; --surface-2:#1B2539; --ink:#E7EDF7; --muted:#9BA8BF; --line:#2A3651;
+  --blue:#86ADE8; --on-blue:#0E1523; --blue-soft:#1C2B46;
+  --red:#F2958A; --red-soft:#3A2023; --green:#72D3A0; --on-green:#0E1523; --green-soft:#153126;
+  --amber:#F1C36A; --amber-soft:#382C13; --paper:#172136; --rule:#243352; --margin:#7B3D3D;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 20px rgba(0,0,0,.25); --focus:#86ADE8;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- casca ---------- */
+.app{max-width:480px;margin:0 auto;min-height:100%;background:var(--bg);position:relative}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;align-items:center;gap:8px;padding:10px 16px 8px;border-bottom:1px solid transparent}
+.bar.scrolled{border-bottom-color:var(--line)}
+.bar-title{flex:1;min-width:0}
+.eyebrow{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar h1{font-size:22px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none}
+.icon-btn:hover{background:var(--surface-2)}
+.who{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px 4px 4px;min-height:40px;cursor:pointer;font-weight:600;font-size:14px;flex:none;max-width:45%}
+.who span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;background:var(--blue-soft);color:var(--blue);flex:none}
+.avatar.cli{background:var(--red-soft);color:var(--red)}
+.avatar.lg{width:44px;height:44px;font-size:18px}
+.screen{padding:8px 16px 28px;display:flex;flex-direction:column;gap:16px}
+.has-nav .screen{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.has-foot .screen{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.banner{margin:0 16px 4px;padding:8px 12px;border-radius:10px;background:var(--amber-soft);color:var(--amber);font-size:13px;font-weight:600}
+
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);z-index:30;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+.tab{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;min-height:56px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;position:relative}
+.tab[aria-current="page"]{color:var(--blue)}
+.tab[aria-current="page"] svg{background:var(--blue-soft);border-radius:999px;padding:2px 12px;width:48px}
+.tab .dot{position:absolute;top:6px;right:calc(50% - 20px);min-width:18px;height:18px;border-radius:9px;background:var(--amber);color:var(--surface);font-size:11px;display:grid;place-items:center;padding:0 5px}
+.foot{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:12px}
+.foot .sum{flex:1;min-width:0}
+.foot .sum small{display:block;color:var(--muted);font-size:13px}
+.foot .sum strong{font-family:var(--display);font-size:22px}
+
+/* ---------- elementos ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.green{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn.green:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--red);border-color:var(--red)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--blue)}
+.btn.block{width:100%}
+.btn.tall{min-height:64px;font-size:17px;flex-direction:column;gap:2px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn svg{flex:none}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.sec{font-size:17px;font-weight:700;display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-top:4px}
+.sec small{font-family:var(--body);font-weight:500;color:var(--muted);font-size:13px}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.hello{font-size:15px;color:var(--muted);margin:4px 0 -4px}
+
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.chip.devendo{background:var(--blue-soft);color:var(--blue)}
+.chip.atraso{background:var(--red-soft);color:var(--red)}
+.chip.emdia{background:var(--green-soft);color:var(--green)}
+.chip.credito{background:var(--green-soft);color:var(--green)}
+.chip.aberta{background:var(--amber-soft);color:var(--amber)}
+.chip.neutro{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+
+.alert{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid transparent;text-align:left;width:100%;cursor:pointer;background:var(--amber-soft);color:var(--ink)}
+.alert svg{color:var(--amber);flex:none;margin-top:1px}
+.alert.red{background:var(--red-soft)}
+.alert.red svg{color:var(--red)}
+.alert strong{display:block}
+.alert span{font-size:14px;color:var(--muted)}
+div.alert{cursor:default}
+
+/* caderno: a página pautada com margem vermelha */
+.paper{position:relative;background-color:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px 18px 58px;overflow:hidden;box-shadow:var(--shadow);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);background-position:0 16px}
+.paper::before{content:"";position:absolute;left:42px;top:0;bottom:0;width:2px;background:var(--margin)}
+.paper .p-name{font-family:var(--display);font-weight:700;font-size:20px;line-height:32px;text-transform:uppercase;letter-spacing:.02em}
+.paper .p-name small{font-family:var(--body);text-transform:none;letter-spacing:0;font-weight:500;color:var(--muted);font-size:14px;margin-left:6px}
+.paper .p-label{line-height:32px;color:var(--muted);font-size:15px}
+.paper .p-amount{font-family:var(--display);font-weight:800;font-size:46px;line-height:64px;letter-spacing:-.02em}
+.paper .p-amount.deve{color:var(--red)}
+.paper .p-amount.ok{color:var(--green)}
+.paper .p-foot{line-height:32px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.summary{display:grid;gap:4px;background:var(--blue);color:var(--on-blue);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+.summary .label{font-size:14px;opacity:.85;font-weight:600}
+.summary .big{font-family:var(--display);font-weight:800;font-size:40px;line-height:1.05;letter-spacing:-.02em}
+.summary .sub{font-size:14px;opacity:.85}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat small{display:block;color:var(--muted);font-size:13px;font-weight:600}
+.stat strong{font-family:var(--display);font-size:22px}
+.stat.wide{grid-column:1/-1}
+
+/* listas */
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.list>*+*{border-top:1px solid var(--line)}
+.lrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;border:0;background:transparent;padding:12px 14px;text-align:left;cursor:pointer;min-height:60px}
+button.lrow:hover{background:var(--surface-2)}
+.ldate{font-family:var(--display);font-weight:700;font-size:14px;color:var(--muted);width:44px;text-align:center;line-height:1.1}
+.ldate small{display:block;font-family:var(--body);font-weight:500;font-size:11px}
+.ldesc{min-width:0}
+.ldesc strong{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ldesc small{display:block;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lval{font-family:var(--display);font-weight:700;font-size:17px;text-align:right;white-space:nowrap}
+.lval small{display:block;font-family:var(--body);font-weight:500;font-size:12px;color:var(--muted)}
+.lval.compra{color:var(--ink)}
+.lval.pag{color:var(--green)}
+.cancel .ldesc strong,.cancel .lval{text-decoration:line-through;opacity:.55}
+.tagline{display:inline-flex;gap:6px;margin-top:3px;flex-wrap:wrap}
+.empty{padding:22px 16px;text-align:center;color:var(--muted)}
+
+/* formulários */
+.field{display:grid;gap:6px}
+.field label,.legend{font-weight:600;font-size:15px}
+.field .hint{font-size:13px;color:var(--muted)}
+.input,select.input,textarea.input{width:100%;min-height:48px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:10px 14px;font-size:16px}
+textarea.input{min-height:96px;resize:vertical}
+.input:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px var(--blue-soft)}
+.money{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 14px;min-height:64px}
+.money:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.money span{font-family:var(--display);font-weight:700;font-size:22px;color:var(--muted);margin-right:8px}
+.money input{border:0;background:transparent;outline:none;font-family:var(--display);font-weight:800;font-size:32px;width:100%;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.pick{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;min-height:44px;font-weight:600;cursor:pointer}
+.pick[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--on-blue)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg label{display:grid;place-items:center;min-height:44px;border-radius:9px;font-weight:600;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:checked+span{background:var(--surface);box-shadow:var(--shadow);color:var(--blue)}
+.seg span{display:grid;place-items:center;width:100%;height:100%;border-radius:9px;min-height:44px}
+.seg label:has(input:focus-visible) span{outline:3px solid var(--focus)}
+.radio-list{display:grid;gap:8px}
+.radio-list label{display:flex;gap:12px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;min-height:52px;cursor:pointer;font-weight:500}
+.radio-list input{width:20px;height:20px;accent-color:var(--blue)}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--muted)}
+.check input{width:22px;height:22px;margin-top:1px;accent-color:var(--blue);flex:none}
+.err{color:var(--red);font-size:14px;font-weight:600}
+
+/* cardápio com contador */
+.cat{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:4px 0 -6px}
+.prod{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 14px}
+.prod .pinfo{flex:1;min-width:0}
+.prod .pinfo strong{display:block;font-weight:600}
+.prod .pinfo small{color:var(--muted);font-size:14px}
+.prod.sel{background:var(--blue-soft)}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.stepper button:hover{background:var(--surface-2)}
+.stepper output{min-width:28px;text-align:center;font-family:var(--display);font-weight:700;font-size:18px}
+details.more{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 14px}
+details.more summary{min-height:52px;display:flex;align-items:center;font-weight:600;cursor:pointer;color:var(--blue)}
+details.more[open]{padding-bottom:14px}
+details.more .grid{display:grid;grid-template-columns:1fr 130px;gap:10px}
+
+/* detalhe */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:15px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;text-align:right;font-weight:600}
+.items{width:100%;border-collapse:collapse;font-size:15px}
+.items td{padding:8px 0;border-bottom:1px solid var(--line)}
+.items td:last-child{text-align:right}
+.items tfoot td{border-bottom:0;font-weight:700;font-family:var(--display);font-size:18px;padding-top:12px}
+.quote{border-left:3px solid var(--amber);padding:6px 0 6px 12px;margin:8px 0;color:var(--ink)}
+.tbl-wrap{overflow-x:auto}
+table.rep{width:100%;border-collapse:collapse;font-size:14px}
+table.rep th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.rep th:first-child,table.rep td:first-child{text-align:left}
+table.rep td{padding:10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.rep tr:last-child td{border-bottom:0}
+
+/* login */
+.login{min-height:100%;display:flex;flex-direction:column;gap:20px;padding:28px 16px 28px;max-width:480px;margin:0 auto}
+.brand h1{font-size:40px;font-weight:800;letter-spacing:-.02em;margin-top:6px}
+.brand p{color:var(--muted);margin:8px 0 0;font-size:16px;max-width:34ch}
+.mini-page{font-family:var(--display);font-size:15px;line-height:28px;padding:10px 16px 12px 52px;background-size:auto;background-image:repeating-linear-gradient(to bottom,transparent 0 27px,var(--rule) 27px 28px);background-position:0 10px}
+.mini-page::before{left:38px}
+.mini-page s{color:var(--muted);text-decoration-color:var(--red)}
+.demo{display:grid;gap:8px}
+.demo .btn{justify-content:flex-start;text-align:left}
+.demo .btn small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+.demo .btn.primary small{color:inherit;opacity:.8}
+.fine{font-size:13px;color:var(--muted)}
+.code-input{letter-spacing:.5em;font-family:var(--display);font-weight:700;font-size:28px;text-align:center}
+
+/* folha (bottom sheet) e aviso */
+.sheet-wrap{position:fixed;inset:0;z-index:50;background:rgba(10,16,28,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:min(480px,100%);max-height:88vh;overflow:auto;background:var(--surface);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;animation:up .18s ease-out}
+.sheet h2{font-size:20px}
+@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;max-width:calc(100% - 32px);box-shadow:var(--shadow);width:max-content}
+.loading{min-height:60vh;display:grid;place-items:center;color:var(--muted)}
+.setup{padding:28px 16px;max-width:480px;margin:0 auto;display:grid;gap:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+
+<div id="app"><div class="loading">Abrindo o caderno…</div></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+"use strict";
+document.documentElement.lang = "pt-BR";
+
+/* ============ configurações do protótipo ============ */
+const APP_URL = "https://claude.ai/artifact/QrZ4FiNrEjUv5Hj77rFRf4";  // link do app, usado no convite
+const DEMO_CODE = "1234";     // código de teste (no app real viria por SMS)
+const LOCAL_KEY = "caderno-do-fiado-v1";
+const SESS_KEY = "caderno-do-fiado-sessao";
+const COLS = ["clientes", "lancamentos", "produtos", "config"];
+const CATEGORIAS = ["Salgados", "Bebidas", "Doces", "Outros"];
+const FORMAS = ["Dinheiro", "Pix", "Cartão"];
+const MOTIVOS = ["Não fiz essa compra", "O valor está errado", "Já paguei isso", "Outro motivo"];
+
+/* ============ utilidades ============ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const money = (c) => BRL.format((c || 0) / 100);
+function parseMoney(str) {
+  let s = String(str ?? "").trim().replace(/[^\d,.]/g, "");
+  if (!s) return NaN;
+  if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
+  const v = Number(s);
+  return Number.isFinite(v) ? Math.round(v * 100) : NaN;
+}
+const toInput = (c) => (c / 100).toFixed(2).replace(".", ",");
+function todayISO() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+function addDays(iso, n) { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+const fmtD = (iso) => { const [, m, d] = String(iso).split("-"); return `${d}/${m}`; };
+const fmtDLong = (iso) => { const [y, m, d] = String(iso).split("-"); return `${+d} de ${MESES[+m - 1]}. de ${y}`; };
+const daysBetween = (a, b) => Math.round((Date.parse(b + "T12:00:00") - Date.parse(a + "T12:00:00")) / 86400000);
+function fmtHora(ts) { try { return new Date(ts).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }); } catch (e) { return ""; } }
+const digits = (s) => String(s || "").replace(/\D/g, "");
+function fmtPhone(s) { const d = digits(s); if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`; if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`; return s || ""; }
+function rid() { try { return crypto.randomUUID().replace(/-/g, "").slice(0, 20); } catch (e) { return Math.random().toString(36).slice(2) + Date.now().toString(36); } }
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+const initial = (n) => esc(String(n || "?").trim().charAt(0).toUpperCase());
+function saudacao() { const h = new Date().getHours(); return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite"; }
+function waLink(phone, text) { const d = digits(phone); return `https://wa.me/${d ? "55" + d : ""}?text=${encodeURIComponent(text)}`; }
+
+const I = {
+  back: '<path d="M15 18l-6-6 6-6"/>',
+  home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7"/><path d="M18 14.8c1.9.7 3.1 2.5 3.5 5.2"/>',
+  box: '<path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/>',
+  chart: '<path d="M5 20V11M11 20V5M17 20v-6M3 20h18"/>',
+  wallet: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14.5h2"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>',
+  chat: '<path d="M20.5 12a8.5 8.5 0 01-12.3 7.6L3.5 20.5l1-4.4A8.5 8.5 0 1120.5 12z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  alert: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17v.01"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  send: '<path d="M4 12l16-8-6 16-2.5-6.5z"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  logout: '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"/>',
+  cart: '<path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/>',
+  cash: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/>',
+  flag: '<path d="M5 21V4h11l-2 4 2 4H5"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/>',
+  sliders: '<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  userplus: '<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.5 3.4-5.5 6.5-5.5 1.6 0 3 .5 4.2 1.4"/><path d="M18 14v6M15 17h6"/>',
+};
+const icon = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3600);
+}
+
+/* ============ dados de exemplo (a página do caderno do João) ============ */
+function exemplo() {
+  const item = (produtoId, nome, preco, qtd = 1) => ({ produtoId, nome, preco, qtd });
+  const compra = (clienteId, data, hora, itens) => ({ clienteId, tipo: "compra", data, itens, valor: itens.reduce((s, i) => s + i.preco * i.qtd, 0), criadoEm: new Date(`${data}T${hora}:00-04:00`).toISOString(), autor: "dona" });
+  const pag = (clienteId, data, hora, valor, forma) => ({ clienteId, tipo: "pagamento", data, valor, forma, criadoEm: new Date(`${data}T${hora}:00-04:00`).toISOString(), autor: "dona" });
+  return {
+    config: { loja: { nomeLoja: "Lanchonete da Tia", nomeDona: "Tia", telefoneDona: "95990000000", prazoAtraso: 30 } },
+    produtos: {
+      coxinha: { nome: "Coxinha", categoria: "Salgados", preco: 700, ativo: true },
+      pastel: { nome: "Pastel", categoria: "Salgados", preco: 800, ativo: true },
+      suco: { nome: "Suco", categoria: "Bebidas", preco: 500, ativo: true },
+      refri: { nome: "Refrigerante lata", categoria: "Bebidas", preco: 600, ativo: true },
+      agua: { nome: "Água", categoria: "Bebidas", preco: 300, ativo: true },
+    },
+    clientes: {
+      joao: { nome: "João", apelido: "", telefone: "95981110001", criadoEm: "2026-09-01T09:00:00-04:00", conviteEm: "2026-09-01T09:05:00-04:00", consentimento: true },
+      maria: { nome: "Maria", apelido: "vizinha da frente", telefone: "95981110002", criadoEm: "2026-08-05T09:00:00-04:00", conviteEm: "2026-08-05T09:05:00-04:00", consentimento: true },
+      carlos: { nome: "Carlos", apelido: "da oficina", telefone: "95981110003", criadoEm: "2026-09-10T09:00:00-04:00", conviteEm: "2026-09-10T09:05:00-04:00", consentimento: true },
+    },
+    lancamentos: {
+      j1: compra("joao", "2026-09-15", "15:10", [item("coxinha", "Coxinha", 700)]),
+      j2: compra("joao", "2026-09-15", "15:12", [item("suco", "Suco", 500)]),
+      j3: pag("joao", "2026-09-16", "16:40", 500, "Dinheiro"),
+      j4: compra("joao", "2026-09-17", "15:05", [item("pastel", "Pastel", 800)]),
+      m1: compra("maria", "2026-08-10", "10:20", [item("coxinha", "Coxinha", 700), item("suco", "Suco", 500)]),
+      m2: compra("maria", "2026-08-12", "10:05", [item("pastel", "Pastel", 800)]),
+      c1: compra("carlos", "2026-09-18", "12:30", [item("pastel", "Pastel", 800)]),
+      c2: pag("carlos", "2026-09-19", "17:50", 800, "Pix"),
+    },
+  };
+}
+function basico() {
+  const e = exemplo();
+  return { config: e.config, produtos: e.produtos, clientes: {}, lancamentos: {} };
+}
+
+/* ============ armazenamento: banco compartilhado ou este aparelho ============ */
+const Store = {
+  mode: "loading", db: null, readOnly: false, loaded: new Set(),
+  data: { clientes: {}, lancamentos: {}, produtos: {}, config: {} },
+  subs: [],
+  emit() { this.subs.forEach((f) => f()); },
+  get ready() { return this.mode === "local" || (this.mode === "db" && this.loaded.size === COLS.length); },
+  get empty() { return !this.data.config.loja; },
+  async start() {
+    let db = null;
+    if (window.claude && typeof window.claude.use === "function") {
+      try { db = await window.claude.use("db"); } catch (e) { db = null; }
+    }
+    if (db) {
+      this.mode = "db"; this.db = db;
+      COLS.forEach((col) => {
+        db.collection(col).onSnapshot((snap) => {
+          const m = {}; snap.docs.forEach((d) => { m[d.id] = d.data(); });
+          this.data[col] = m; this.loaded.add(col); this.emit();
+        }, (err) => {
+          console.warn("db", col, err);
+          this.loaded.add(col);
+          if (err && err.code === "revoked") this.readOnly = true;
+          toast("A conexão com os dados caiu. Recarregue a página.");
+          this.emit();
+        });
+      });
+    } else {
+      this.mode = "local"; this.loadLocal(); this.emit();
+    }
+  },
+  loadLocal() {
+    let raw = null; try { raw = localStorage.getItem(LOCAL_KEY); } catch (e) {}
+    if (raw) { try { const d = JSON.parse(raw); COLS.forEach((c) => { d[c] = d[c] || {}; }); this.data = d; return; } catch (e) {} }
+    this.data = exemplo(); this.saveLocal();
+  },
+  saveLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(this.data)); } catch (e) {} },
+  newId(col) { if (this.mode === "db") { try { return this.db.collection(col).doc().id; } catch (e) {} } return rid(); },
+  async run(fn) {
+    try { await fn(); return true; }
+    catch (e) {
+      if (e && e.code === "unavailable") {
+        await new Promise((r) => setTimeout(r, 600 + Math.random() * 600));
+        try { await fn(); return true; } catch (e2) { e = e2; }
+      }
+      const code = e && e.code;
+      if (code === "invalid_argument") { this.readOnly = true; toast("Você só pode ver estes dados, não alterar."); }
+      else if (code === "quota_exceeded") toast("O caderno está cheio. Apague registros antigos para continuar.");
+      else toast("Não foi possível salvar agora. Tente de novo.");
+      console.warn(e); render(); return false;
+    }
+  },
+  async put(col, id, obj) {
+    if (this.mode === "db") return this.run(() => this.db.collection(col).doc(id).set(obj));
+    this.data[col][id] = JSON.parse(JSON.stringify(obj)); this.saveLocal(); this.emit(); return true;
+  },
+  async patch(col, id, p) {
+    if (this.mode === "db") return this.run(() => this.db.collection(col).doc(id).update(p));
+    this.data[col][id] = Object.assign({}, this.data[col][id], JSON.parse(JSON.stringify(p))); this.saveLocal(); this.emit(); return true;
+  },
+  async loadAll(seed) {
+    if (this.mode !== "db") { this.data = seed; this.saveLocal(); this.emit(); return true; }
+    for (const col of COLS) for (const [id, body] of Object.entries(seed[col])) { if (!(await this.put(col, id, body))) return false; }
+    return true;
+  },
+};
+
+/* ============ regras do fiado ============ */
+const C = {
+  cfg() { return Object.assign({ nomeLoja: "Lanchonete", nomeDona: "Dona", telefoneDona: "", prazoAtraso: 30 }, Store.data.config.loja || {}); },
+  clientes() { return Object.entries(Store.data.clientes).map(([id, c]) => Object.assign({ id }, c)); },
+  cliente(id) { const c = Store.data.clientes[id]; return c ? Object.assign({ id }, c) : null; },
+  produtos() { return Object.entries(Store.data.produtos).map(([id, p]) => Object.assign({ id }, p)).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")); },
+  todos() { return Object.entries(Store.data.lancamentos).map(([id, l]) => Object.assign({ id }, l)); },
+  lanc(id) { const l = Store.data.lancamentos[id]; return l ? Object.assign({ id }, l) : null; },
+  chrono(a, b) { return String(a.data).localeCompare(String(b.data)) || String(a.criadoEm).localeCompare(String(b.criadoEm)); },
+  doCliente(cid) { return C.todos().filter((l) => l.clienteId === cid).sort(C.chrono); },
+  sinal(l) { return l.cancelado ? 0 : l.tipo === "compra" ? l.valor : -l.valor; },
+  saldo(cid) { return C.doCliente(cid).reduce((s, l) => s + C.sinal(l), 0); },
+  extrato(cid) { let s = 0; return C.doCliente(cid).map((l) => { s += C.sinal(l); return Object.assign({ saldoApos: s }, l); }); },
+  ultimoPag(cid) { const p = C.doCliente(cid).filter((l) => l.tipo === "pagamento" && !l.cancelado); return p[p.length - 1] || null; },
+  status(cid) {
+    const saldo = C.saldo(cid);
+    if (saldo < 0) return { k: "credito", label: "Com crédito" };
+    if (saldo === 0) return { k: "emdia", label: "Em dia" };
+    const up = C.ultimoPag(cid);
+    const primeira = C.doCliente(cid).find((l) => l.tipo === "compra" && !l.cancelado);
+    const ref = up ? up.data : primeira ? primeira.data : todayISO();
+    const dias = Math.max(0, daysBetween(ref, todayISO()));
+    if (dias > C.cfg().prazoAtraso) return { k: "atraso", label: `Em atraso · ${dias} dias`, dias };
+    return { k: "devendo", label: "Devendo", dias };
+  },
+  abertas(cid) { return C.todos().filter((l) => l.contestacao && l.contestacao.status === "aberta" && (!cid || l.clienteId === cid)).sort((a, b) => String(b.contestacao.em).localeCompare(String(a.contestacao.em))); },
+  desc(l) {
+    if (l.tipo === "pagamento") return "Pagamento";
+    const it = l.itens || [];
+    if (!it.length) return "Compra";
+    return it.map((i) => (i.qtd > 1 ? `${i.nome} ×${i.qtd}` : i.nome)).join(", ");
+  },
+};
+
+/* ============ estado da interface ============ */
+const S = { sess: null, stack: [], form: {}, sheet: null, login: { step: "tel", tel: "", code: "", err: "" } };
+function loadSess() { try { const s = JSON.parse(localStorage.getItem(SESS_KEY) || "null"); if (s && s.perfil) S.sess = s; } catch (e) {} }
+function saveSess() { try { if (S.sess) localStorage.setItem(SESS_KEY, JSON.stringify(S.sess)); else localStorage.removeItem(SESS_KEY); } catch (e) {} }
+const cur = () => S.stack[S.stack.length - 1] || { name: "inicio" };
+function go(v) { S.stack.push(v); S.form = {}; S.sheet = null; render(); window.scrollTo(0, 0); }
+function replace(v) { S.stack[S.stack.length - 1] = v; S.form = {}; S.sheet = null; render(); window.scrollTo(0, 0); }
+function back() { if (S.stack.length > 1) { S.stack.pop(); S.form = {}; S.sheet = null; render(); window.scrollTo(0, 0); } }
+function home() { resetTo({ name: S.sess && S.sess.perfil === "cliente" ? "saldo" : "inicio" }); }
+function resetTo(v) { S.stack = [v]; S.form = {}; S.sheet = null; render(); window.scrollTo(0, 0); }
+function entrar(sess) { S.sess = sess; saveSess(); S.login = { step: "tel", tel: "", code: "", err: "" }; home(); toast(sess.perfil === "dona" ? `Bem-vinda, ${C.cfg().nomeDona}!` : `Olá, ${C.cliente(sess.clienteId).nome}!`); }
+function sair() { S.sess = null; saveSess(); S.stack = []; S.sheet = null; render(); }
+
+/* ============ pedaços de tela ============ */
+function statusChip(cid) { const s = C.status(cid); return `<span class="chip ${s.k}">${esc(s.label)}</span>`; }
+
+function lancRow(l, opts = {}) {
+  const pag = l.tipo === "pagamento";
+  const cli = opts.showCliente ? C.cliente(l.clienteId) : null;
+  const sub = [];
+  if (cli) sub.push(esc(cli.nome));
+  sub.push(pag ? esc(l.forma || "Pagamento") : "Compra");
+  if (opts.saldo && l.saldoApos != null && !l.cancelado) sub.push(`saldo ${money(l.saldoApos)}`);
+  const tags = [];
+  if (l.cancelado) tags.push('<span class="chip neutro">Cancelado</span>');
+  if (l.contestacao) tags.push(l.contestacao.status === "aberta" ? '<span class="chip aberta">Contestado</span>' : `<span class="chip neutro">Contestação ${l.contestacao.status === "aceita" ? "aceita" : "respondida"}</span>`);
+  const [y] = String(l.data).split("-");
+  return `<button class="lrow${l.cancelado ? " cancel" : ""}" data-action="go" data-view="${opts.view || "lanc"}" data-id="${esc(l.id)}">
+    <span class="ldate num">${fmtD(l.data)}${y !== todayISO().slice(0, 4) ? `<small>${y}</small>` : ""}</span>
+    <span class="ldesc"><strong>${esc(C.desc(l))}</strong><small>${sub.join(" · ")}</small>${tags.length ? `<span class="tagline">${tags.join("")}</span>` : ""}</span>
+    <span class="lval num ${pag ? "pag" : "compra"}">${pag ? "− " : "+ "}${money(l.valor)}</span>
+  </button>`;
+}
+
+function extratoList(cid, view) {
+  const ex = C.extrato(cid).reverse();
+  if (!ex.length) return `<div class="list"><p class="empty">Nenhuma anotação ainda.</p></div>`;
+  return `<div class="list">${ex.map((l) => lancRow(l, { saldo: true, view })).join("")}</div>`;
+}
+
+function paperCard(c, forCliente) {
+  const saldo = C.saldo(c.id);
+  const up = C.ultimoPag(c.id);
+  let label, amount, cls;
+  if (saldo > 0) { label = forCliente ? "Você deve" : "Deve"; amount = money(saldo); cls = "deve"; }
+  else if (saldo < 0) { label = forCliente ? "Você tem crédito de" : "Tem crédito de"; amount = money(-saldo); cls = "ok"; }
+  else { label = forCliente ? "Você não deve nada" : "Não deve nada"; amount = money(0); cls = "ok"; }
+  return `<section class="paper" aria-label="Saldo de ${esc(c.nome)}">
+    <div class="p-name">${esc(c.nome)}${c.apelido ? `<small>${esc(c.apelido)}</small>` : ""}</div>
+    <div class="p-label">${label}</div>
+    <div class="p-amount num ${cls}">${amount}</div>
+    <div class="p-foot">${statusChip(c.id)}<span class="muted small">${up ? `Último pagamento: ${fmtD(up.data)} · ${money(up.valor)}` : "Nenhum pagamento ainda"}</span></div>
+  </section>`;
+}
+
+function clienteRow(c, action = "go", view = "ficha", extra = "") {
+  const saldo = C.saldo(c.id);
+  return `<button class="lrow" data-action="${action}" data-view="${view}" data-id="${esc(c.id)}" ${extra}>
+    <span class="avatar cli">${initial(c.nome)}</span>
+    <span class="ldesc"><strong>${esc(c.nome)}${c.apelido ? ` <span class="muted" style="font-weight:500">· ${esc(c.apelido)}</span>` : ""}</strong><span class="tagline">${statusChip(c.id)}</span></span>
+    <span class="lval num ${saldo > 0 ? "compra" : "pag"}">${money(Math.abs(saldo))}<small>${saldo > 0 ? "deve" : saldo < 0 ? "crédito" : "em dia"}</small></span>
+  </button>`;
+}
+
+function ordenarClientes(list) {
+  const peso = { atraso: 0, devendo: 1, credito: 2, emdia: 3 };
+  return list.sort((a, b) => peso[C.status(a.id).k] - peso[C.status(b.id).k] || C.saldo(b.id) - C.saldo(a.id) || a.nome.localeCompare(b.nome, "pt-BR"));
+}
+
+function textoExtrato(cid) {
+  const c = C.cliente(cid), cfg = C.cfg(), saldo = C.saldo(cid);
+  const linhas = C.extrato(cid).filter((l) => !l.cancelado).slice(-12).map((l) => `${fmtD(l.data)} — ${C.desc(l)} — ${l.tipo === "pagamento" ? "pagou " : ""}${money(l.valor)}`);
+  return `Olá, ${c.nome}! Aqui é da ${cfg.nomeLoja}. Seu extrato do fiado:\n\n${linhas.join("\n")}\n\n${saldo > 0 ? `Saldo a pagar: ${money(saldo)}` : saldo < 0 ? `Você tem crédito de ${money(-saldo)}` : "Você não deve nada. Obrigada!"}${APP_URL ? `\n\nVeja tudo no app: ${APP_URL}` : ""}`;
+}
+function textoConvite(cid) {
+  const c = C.cliente(cid), cfg = C.cfg();
+  return `Olá, ${c.nome}! A ${cfg.nomeLoja} agora anota o fiado no celular.\n\nPara ver seu saldo e cada compra e pagamento, entre no app${APP_URL ? ` (${APP_URL})` : ""} com o número ${fmtPhone(c.telefone)} e o código que chega por SMS.\n\nGuardamos só seu nome e celular, e só para o controle do fiado.`;
+}
+
+/* ============ telas da dona ============ */
+const V = {};
+
+V.inicio = () => {
+  const cfg = C.cfg(), t = todayISO();
+  const cls = C.clientes();
+  const devendo = cls.filter((c) => C.saldo(c.id) > 0);
+  const total = devendo.reduce((s, c) => s + C.saldo(c.id), 0);
+  const atraso = cls.filter((c) => C.status(c.id).k === "atraso");
+  const abertas = C.abertas();
+  const hoje = C.todos().filter((l) => l.data === t && !l.cancelado);
+  const vend = hoje.filter((l) => l.tipo === "compra").reduce((s, l) => s + l.valor, 0);
+  const rec = hoje.filter((l) => l.tipo === "pagamento").reduce((s, l) => s + l.valor, 0);
+  const ult = C.todos().sort((a, b) => String(b.criadoEm).localeCompare(String(a.criadoEm))).slice(0, 5);
+  return {
+    title: "Início",
+    body: `
+      <p class="hello">${saudacao()}, ${esc(cfg.nomeDona)}.</p>
+      <section class="summary" aria-label="Resumo do fiado">
+        <span class="label">A receber no fiado</span>
+        <strong class="big num">${money(total)}</strong>
+        <span class="sub">${devendo.length ? plural(devendo.length, "cliente devendo", "clientes devendo") : "Ninguém devendo agora"}</span>
+      </section>
+      ${abertas.length ? `<button class="alert" data-action="go" data-view="lanc" data-id="${esc(abertas[0].id)}">${icon("flag")}<div><strong>${plural(abertas.length, "contestação para responder", "contestações para responder")}</strong><span>${esc(C.cliente(abertas[0].clienteId)?.nome || "")} contestou “${esc(C.desc(abertas[0]))}” de ${fmtD(abertas[0].data)}</span></div></button>` : ""}
+      ${atraso.length ? `<button class="alert red" data-action="tab" data-view="relatorios">${icon("alert")}<div><strong>${plural(atraso.length, "cliente em atraso", "clientes em atraso")}</strong><span>${atraso.map((c) => esc(c.nome)).join(", ")} · mais de ${cfg.prazoAtraso} dias sem pagar</span></div></button>` : ""}
+      <div class="grid2">
+        <button class="btn primary tall" data-action="go" data-view="escolher" data-acao="compra">${icon("cart")}Anotar compra</button>
+        <button class="btn green tall" data-action="go" data-view="escolher" data-acao="pagamento">${icon("cash")}Registrar pagamento</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><small>Vendido fiado hoje</small><strong class="num">${money(vend)}</strong></div>
+        <div class="stat"><small>Recebido hoje</small><strong class="num">${money(rec)}</strong></div>
+      </div>
+      <h2 class="sec">Últimas anotações <small>${fmtDLong(t)}</small></h2>
+      ${ult.length ? `<div class="list">${ult.map((l) => lancRow(l, { showCliente: true })).join("")}</div>` : `<div class="list"><p class="empty">Nada anotado ainda.</p></div>`}`,
+  };
+};
+
+V.clientes = () => {
+  const f = S.form.filtro || "todos";
+  return {
+    title: "Clientes",
+    body: `
+      <button class="btn primary block" data-action="go" data-view="novoCliente">${icon("userplus")}Novo cliente</button>
+      <div class="field"><label for="busca" class="sr">Procurar cliente</label>
+        <input id="busca" class="input" type="search" placeholder="Procurar pelo nome" data-f="busca" value="${esc(S.form.busca || "")}" autocomplete="off"></div>
+      <div class="chips" role="group" aria-label="Filtrar clientes">
+        ${[["todos", "Todos"], ["devendo", "Devendo"], ["atraso", "Em atraso"], ["emdia", "Em dia"]].map(([k, l]) => `<button class="pick" data-action="filtro" data-k="${k}" aria-pressed="${f === k}">${l}</button>`).join("")}
+      </div>
+      <div id="cl-list">${clientesList()}</div>`,
+  };
+};
+function clientesList() {
+  const q = (S.form.busca || "").trim().toLowerCase();
+  const f = S.form.filtro || "todos";
+  let list = C.clientes().filter((c) => !q || (c.nome + " " + (c.apelido || "")).toLowerCase().includes(q));
+  if (f !== "todos") list = list.filter((c) => { const k = C.status(c.id).k; return f === "emdia" ? k === "emdia" || k === "credito" : f === "devendo" ? k === "devendo" || k === "atraso" : k === f; });
+  if (!list.length) return `<div class="list"><p class="empty">${C.clientes().length ? "Nenhum cliente encontrado." : "Nenhum cliente ainda. Cadastre o primeiro."}</p></div>`;
+  return `<div class="list">${ordenarClientes(list).map((c) => clienteRow(c)).join("")}</div>`;
+}
+
+V.escolher = (v) => ({
+  title: v.acao === "compra" ? "Anotar compra de…" : "Pagamento de…",
+  back: true,
+  body: `
+    <div class="field"><label for="busca2">Quem é o cliente?</label>
+      <input id="busca2" class="input" type="search" placeholder="Procurar pelo nome" data-f="busca" value="${esc(S.form.busca || "")}" autocomplete="off"></div>
+    <div id="esc-list">${escolherList(v)}</div>
+    <button class="btn ghost" data-action="go" data-view="novoCliente">${icon("userplus")}Cadastrar novo cliente</button>`,
+});
+function escolherList(v) {
+  const q = (S.form.busca || "").trim().toLowerCase();
+  let list = C.clientes().filter((c) => !q || (c.nome + " " + (c.apelido || "")).toLowerCase().includes(q));
+  if (v.acao === "pagamento") list = list.filter((c) => C.saldo(c.id) > 0 || q);
+  if (!list.length) return `<div class="list"><p class="empty">${v.acao === "pagamento" ? "Ninguém está devendo." : "Nenhum cliente encontrado."}</p></div>`;
+  return `<div class="list">${ordenarClientes(list).map((c) => clienteRow(c, "replace", v.acao)).join("")}</div>`;
+}
+
+V.ficha = (v) => {
+  const c = C.cliente(v.id); if (!c) return notFound();
+  const abertas = C.abertas(c.id);
+  const saldo = C.saldo(c.id);
+  return {
+    title: c.nome, back: true,
+    body: `
+      ${paperCard(c, false)}
+      <div class="grid2">
+        <button class="btn primary tall" data-action="go" data-view="compra" data-id="${esc(c.id)}">${icon("cart")}Anotar compra</button>
+        <button class="btn green tall" data-action="go" data-view="pagamento" data-id="${esc(c.id)}">${icon("cash")}Registrar pagamento</button>
+      </div>
+      <div class="row">
+        <button class="btn" data-action="sheet" data-type="extrato" data-id="${esc(c.id)}">${icon("send", 20)}Enviar extrato</button>
+        <button class="btn" data-action="sheet" data-type="convite" data-id="${esc(c.id)}">${icon("chat", 20)}Reenviar convite</button>
+      </div>
+      ${abertas.map((l) => `<button class="alert" data-action="go" data-view="lanc" data-id="${esc(l.id)}">${icon("flag")}<div><strong>${esc(c.nome)} contestou uma anotação</strong><span>${esc(C.desc(l))} de ${fmtD(l.data)} · “${esc(l.contestacao.motivo)}”. Toque para responder.</span></div></button>`).join("")}
+      <h2 class="sec">Extrato <small>do mais novo para o mais antigo</small></h2>
+      ${extratoList(c.id, "lanc")}
+      <p class="fine">Celular ${esc(fmtPhone(c.telefone))} · cliente desde ${c.criadoEm ? fmtD(String(c.criadoEm).slice(0, 10)) : "—"}${c.conviteEm ? " · convite enviado" : ""}</p>`,
+  };
+};
+
+V.novoCliente = () => ({
+  title: "Novo cliente", back: true, foot: `<button class="btn primary block" data-action="saveCliente">${icon("check")}Salvar e enviar convite</button>`,
+  body: `
+    <div class="field"><label for="n-nome">Nome</label><input id="n-nome" class="input" data-f="nome" value="${esc(S.form.nome || "")}" autocomplete="off" placeholder="Como você chama o cliente"></div>
+    <div class="field"><label for="n-apelido">Apelido ou referência <span class="muted">(opcional)</span></label><input id="n-apelido" class="input" data-f="apelido" value="${esc(S.form.apelido || "")}" autocomplete="off" placeholder="Ex.: vizinho, da oficina"><span class="hint">Ajuda a diferenciar dois clientes com o mesmo nome.</span></div>
+    <div class="field"><label for="n-tel">Celular (com DDD)</label><input id="n-tel" class="input" type="tel" inputmode="tel" data-f="tel" value="${esc(S.form.tel || "")}" placeholder="(95) 90000-0000"><span class="hint">O cliente entra no app com este número.</span></div>
+    <label class="check" for="n-ok"><input type="checkbox" id="n-ok" data-f="ok" ${S.form.ok ? "checked" : ""}><span>O cliente concordou em guardar o nome e o celular dele para o controle do fiado.</span></label>
+    ${S.form.err ? `<p class="err" role="alert">${esc(S.form.err)}</p>` : ""}`,
+});
+
+V.convite = (v) => {
+  const c = C.cliente(v.id); if (!c) return notFound();
+  const txt = textoConvite(c.id);
+  return {
+    title: "Convite", back: true,
+    body: `
+      <div class="alert" style="background:var(--green-soft)"><span style="color:var(--green)">${icon("check")}</span><div><strong>${esc(c.nome)} foi cadastrado</strong><span>Agora mande o convite para ele poder ver o saldo.</span></div></div>
+      <div class="field"><label for="cv-text">Mensagem do convite</label><textarea id="cv-text" class="input" rows="7" readonly>${esc(txt)}</textarea></div>
+      <a class="btn green block" href="${esc(waLink(c.telefone, txt))}" target="_blank" rel="noopener" data-action="conviteEnviado" data-id="${esc(c.id)}">${icon("chat")}Enviar pelo WhatsApp</a>
+      <button class="btn block" data-action="copy" data-target="cv-text">${icon("copy")}Copiar mensagem</button>
+      <button class="btn primary block" data-action="replace" data-view="ficha" data-id="${esc(c.id)}">Ir para a ficha de ${esc(c.nome)}</button>`,
+  };
+};
+
+V.compra = (v) => {
+  const c = C.cliente(v.id); if (!c) return notFound();
+  const q = S.form.qtd || {};
+  const prods = C.produtos().filter((p) => p.ativo !== false);
+  const cats = CATEGORIAS.filter((k) => prods.some((p) => p.categoria === k));
+  if (!S.form.data) S.form.data = todayISO();
+  return {
+    title: `Compra de ${c.nome}`, back: true,
+    foot: `<div class="sum"><small id="c-count">${compraResumo().label}</small><strong class="num" id="c-total">${money(compraResumo().total)}</strong></div><button class="btn primary" id="c-save" data-action="saveCompra" ${compraResumo().total > 0 ? "" : "disabled"}>${icon("check")}Anotar</button>`,
+    body: `
+      <p class="muted small">Toque em + para cada item. O preço vem do cardápio e fica gravado nesta anotação.</p>
+      ${cats.map((k) => `<h3 class="cat">${esc(k)}</h3><div class="list">${prods.filter((p) => p.categoria === k).map((p) => `
+        <div class="prod${q[p.id] ? " sel" : ""}" id="pr-${esc(p.id)}">
+          <div class="pinfo"><strong>${esc(p.nome)}</strong><small class="num">${money(p.preco)}</small></div>
+          <div class="stepper">
+            <button data-action="qty" data-pid="${esc(p.id)}" data-d="-1" aria-label="Tirar um ${esc(p.nome)}">${icon("minus", 20)}</button>
+            <output id="q-${esc(p.id)}" aria-live="polite" aria-label="Quantidade de ${esc(p.nome)}">${q[p.id] || 0}</output>
+            <button data-action="qty" data-pid="${esc(p.id)}" data-d="1" aria-label="Pôr mais um ${esc(p.nome)}">${icon("plus", 20)}</button>
+          </div>
+        </div>`).join("")}</div>`).join("")}
+      ${!prods.length ? `<div class="list"><p class="empty">O cardápio está vazio. Use “Outro item” ou cadastre produtos.</p></div>` : ""}
+      <details class="more" ${S.form.avDesc || S.form.avValor ? "open" : ""}><summary>+ Outro item (fora do cardápio)</summary>
+        <div class="grid"><div class="field"><label for="av-desc">Descrição</label><input id="av-desc" class="input" data-f="avDesc" value="${esc(S.form.avDesc || "")}" placeholder="Ex.: bolo"></div>
+        <div class="field"><label for="av-valor">Valor (R$)</label><input id="av-valor" class="input" inputmode="decimal" data-f="avValor" value="${esc(S.form.avValor || "")}" placeholder="0,00"></div></div>
+      </details>
+      <div class="field"><label for="c-data">Data da compra</label><input id="c-data" class="input" type="date" data-f="data" value="${esc(S.form.data)}" max="${todayISO()}"></div>`,
+  };
+};
+function compraItens() {
+  const q = S.form.qtd || {};
+  const itens = Object.entries(q).filter(([, n]) => n > 0).map(([pid, n]) => { const p = Store.data.produtos[pid]; return p ? { produtoId: pid, nome: p.nome, preco: p.preco, qtd: n } : null; }).filter(Boolean);
+  const av = parseMoney(S.form.avValor);
+  if (av > 0) itens.push({ produtoId: null, nome: (S.form.avDesc || "").trim() || "Outro item", preco: av, qtd: 1 });
+  return itens;
+}
+function compraResumo() {
+  const itens = compraItens();
+  const n = itens.reduce((s, i) => s + i.qtd, 0);
+  return { itens, total: itens.reduce((s, i) => s + i.preco * i.qtd, 0), label: n ? plural(n, "item", "itens") : "Nenhum item" };
+}
+function patchCompra() {
+  const r = compraResumo();
+  const a = $("#c-count"), b = $("#c-total"), s = $("#c-save");
+  if (a) a.textContent = r.label; if (b) b.textContent = money(r.total); if (s) s.disabled = !(r.total > 0);
+}
+
+V.pagamento = (v) => {
+  const c = C.cliente(v.id); if (!c) return notFound();
+  const saldo = C.saldo(c.id);
+  if (!S.form.data) S.form.data = todayISO();
+  if (!S.form.forma) S.form.forma = "Dinheiro";
+  const val = parseMoney(S.form.valor);
+  const sugest = [saldo, 500, 1000, 2000].filter((x, i, a) => x > 0 && a.indexOf(x) === i && (i === 0 || x < saldo));
+  return {
+    title: "Pagamento", back: true,
+    foot: `<div class="sum"><small>Saldo depois</small><strong class="num" id="p-depois">${money(saldo - (val > 0 ? val : 0))}</strong></div><button class="btn green" id="p-save" data-action="savePag" ${val > 0 ? "" : "disabled"}>${icon("check")}Registrar</button>`,
+    body: `
+      <div class="stat wide"><small>${saldo >= 0 ? "Deve agora" : "Crédito agora"}</small><strong class="num" style="color:${saldo > 0 ? "var(--red)" : "var(--green)"}">${money(Math.abs(saldo))}</strong></div>
+      <div class="field"><label for="p-valor">Quanto ${esc(c.nome)} pagou?</label>
+        <div class="money"><span>R$</span><input id="p-valor" inputmode="decimal" autocomplete="off" placeholder="0,00" data-f="valor" value="${esc(S.form.valor || "")}"></div></div>
+      ${sugest.length ? `<div class="chips" role="group" aria-label="Valores rápidos">${sugest.map((x, i) => `<button class="pick" data-action="pvalor" data-v="${x}">${i === 0 && x === saldo ? `Tudo · ${money(x)}` : money(x)}</button>`).join("")}</div>` : ""}
+      <p id="p-aviso" class="muted small" ${val > saldo && saldo >= 0 ? "" : "hidden"}>Valor maior que a dívida: ${esc(c.nome)} fica com crédito.</p>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:6px"><legend class="legend" style="margin-bottom:6px">Forma de pagamento</legend>
+        <div class="seg">${FORMAS.map((f) => `<label><input type="radio" name="forma" value="${f}" data-f="forma" ${S.form.forma === f ? "checked" : ""}><span>${f}</span></label>`).join("")}</div></fieldset>
+      <div class="field"><label for="p-data">Data do pagamento</label><input id="p-data" class="input" type="date" data-f="data" value="${esc(S.form.data)}" max="${todayISO()}"></div>`,
+  };
+};
+function patchPag() {
+  const v = cur(); const saldo = C.saldo(v.id); const val = parseMoney(S.form.valor);
+  const d = $("#p-depois"), s = $("#p-save"), a = $("#p-aviso");
+  if (d) d.textContent = money(saldo - (val > 0 ? val : 0));
+  if (s) s.disabled = !(val > 0);
+  if (a) a.hidden = !(val > saldo && saldo >= 0);
+}
+
+function lancDetalhe(l, forCliente) {
+  const c = C.cliente(l.clienteId);
+  const pag = l.tipo === "pagamento";
+  const ct = l.contestacao;
+  return `
+    <section class="card" style="display:grid;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div><span class="eyebrow">${pag ? "Pagamento" : "Compra"}${forCliente ? "" : ` · ${esc(c ? c.nome : "")}`}</span><h2 style="font-size:28px" class="num">${pag ? "− " : "+ "}${money(l.valor)}</h2></div>
+        ${l.cancelado ? '<span class="chip neutro">Cancelado</span>' : ""}
+      </div>
+      ${pag ? "" : `<table class="items"><tbody>${(l.itens || []).map((i) => `<tr><td>${i.qtd} × ${esc(i.nome)} <span class="muted small">(${money(i.preco)})</span></td><td class="num">${money(i.preco * i.qtd)}</td></tr>`).join("")}</tbody><tfoot><tr><td>Total</td><td class="num">${money(l.valor)}</td></tr></tfoot></table>`}
+      <dl class="kv">
+        <dt>Data</dt><dd>${fmtDLong(l.data)}</dd>
+        ${pag ? `<dt>Forma</dt><dd>${esc(l.forma || "—")}</dd>` : ""}
+        <dt>Anotado em</dt><dd>${esc(fmtHora(l.criadoEm))}</dd>
+        <dt>Anotado por</dt><dd>${esc(C.cfg().nomeDona)}</dd>
+        ${l.cancelado ? `<dt>Cancelado</dt><dd>${esc(l.motivoCancelamento || "sim")}</dd>` : ""}
+      </dl>
+    </section>
+    ${ct ? `<section class="card" style="display:grid;gap:8px;border-color:var(--amber)">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3 style="font-size:17px">Contestação</h3><span class="chip ${ct.status === "aberta" ? "aberta" : "neutro"}">${ct.status === "aberta" ? "Aguardando a dona" : ct.status === "aceita" ? "Aceita" : "Respondida"}</span></div>
+      <p style="margin:0"><strong>${esc(ct.motivo)}</strong></p>
+      ${ct.texto ? `<p class="quote">“${esc(ct.texto)}”</p>` : ""}
+      <p class="fine" style="margin:0">Enviada em ${esc(fmtHora(ct.em))}</p>
+      ${ct.resposta ? `<p style="margin:4px 0 0"><span class="muted small">Resposta da dona:</span><br>${esc(ct.resposta)}</p>` : ""}
+    </section>` : ""}`;
+}
+
+V.lanc = (v) => {
+  const l = C.lanc(v.id); if (!l) return notFound();
+  const ct = l.contestacao;
+  const aberta = ct && ct.status === "aberta";
+  return {
+    title: "Anotação", back: true,
+    body: `
+      ${lancDetalhe(l, false)}
+      ${aberta ? `
+        <div class="field"><label for="ct-resp">Sua resposta para ${esc(C.cliente(l.clienteId)?.nome || "o cliente")}</label><textarea id="ct-resp" class="input" data-f="resp" placeholder="Ex.: Conferi e você tem razão, já corrigi.">${esc(S.form.resp || "")}</textarea></div>
+        <button class="btn primary block" data-action="aceitar">${icon("check")}Cliente tem razão: cancelar anotação</button>
+        <button class="btn block" data-action="manter">Manter anotação e responder</button>` : ""}
+      ${!aberta && !l.cancelado ? `<button class="btn danger block" data-action="sheet" data-type="cancelar" data-id="${esc(l.id)}">${icon("x")}Cancelar esta anotação</button><p class="fine">Cancelar não apaga: a anotação fica riscada no extrato, e o cliente vê o motivo.</p>` : ""}
+      <button class="btn ghost" data-action="replace" data-view="ficha" data-id="${esc(l.clienteId)}">Ver ficha de ${esc(C.cliente(l.clienteId)?.nome || "cliente")}</button>`,
+  };
+};
+
+V.produtos = () => {
+  const prods = C.produtos();
+  const cats = CATEGORIAS.filter((k) => prods.some((p) => p.categoria === k));
+  return {
+    title: "Produtos",
+    body: `
+      <button class="btn primary block" data-action="go" data-view="produtoForm">${icon("plus")}Novo produto</button>
+      <p class="muted small">Mudar um preço aqui vale para as próximas anotações. O que já foi anotado continua com o valor da época.</p>
+      ${cats.map((k) => `<h3 class="cat">${esc(k)}</h3><div class="list">${prods.filter((p) => p.categoria === k).map((p) => `
+        <button class="lrow" data-action="go" data-view="produtoForm" data-id="${esc(p.id)}" style="grid-template-columns:1fr auto auto">
+          <span class="ldesc"><strong>${esc(p.nome)}</strong>${p.ativo === false ? '<span class="tagline"><span class="chip neutro">Fora do cardápio</span></span>' : ""}</span>
+          <span class="lval num">${money(p.preco)}</span><span class="muted">${icon("edit", 18)}</span>
+        </button>`).join("")}</div>`).join("")}
+      ${!prods.length ? `<div class="list"><p class="empty">Nenhum produto no cardápio.</p></div>` : ""}`,
+  };
+};
+
+V.produtoForm = (v) => {
+  const p = v.id ? Store.data.produtos[v.id] : null;
+  if (v.id && !p) return notFound();
+  if (!S.form.init) { S.form = { init: true, nome: p ? p.nome : "", categoria: p ? p.categoria : "Salgados", preco: p ? toInput(p.preco) : "", ativo: p ? p.ativo !== false : true }; }
+  return {
+    title: p ? "Editar produto" : "Novo produto", back: true,
+    foot: `<button class="btn primary block" data-action="saveProduto">${icon("check")}Salvar produto</button>`,
+    body: `
+      <div class="field"><label for="pf-nome">Nome</label><input id="pf-nome" class="input" data-f="nome" value="${esc(S.form.nome)}" placeholder="Ex.: Coxinha"></div>
+      <div class="field"><label for="pf-cat">Categoria</label><select id="pf-cat" class="input" data-f="categoria">${CATEGORIAS.map((k) => `<option ${S.form.categoria === k ? "selected" : ""}>${k}</option>`).join("")}</select></div>
+      <div class="field"><label for="pf-preco">Preço</label><div class="money"><span>R$</span><input id="pf-preco" inputmode="decimal" data-f="preco" value="${esc(S.form.preco)}" placeholder="0,00"></div></div>
+      <label class="check" for="pf-ativo"><input type="checkbox" id="pf-ativo" data-f="ativo" ${S.form.ativo ? "checked" : ""}><span>Aparece no cardápio na hora de anotar</span></label>
+      ${S.form.err ? `<p class="err" role="alert">${esc(S.form.err)}</p>` : ""}`,
+  };
+};
+
+V.relatorios = () => {
+  const cfg = C.cfg(), t = todayISO();
+  const cls = C.clientes();
+  const devendo = ordenarClientes(cls.filter((c) => C.saldo(c.id) > 0));
+  const total = devendo.reduce((s, c) => s + C.saldo(c.id), 0);
+  const atraso = devendo.filter((c) => C.status(c.id).k === "atraso");
+  const per = S.form.per || "30";
+  const ini = per === "tudo" ? "0000-00-00" : per === "mes" ? t.slice(0, 8) + "01" : addDays(t, -(+per - 1));
+  const noPer = C.todos().filter((l) => !l.cancelado && l.data >= ini && l.data <= t);
+  const vend = noPer.filter((l) => l.tipo === "compra").reduce((s, l) => s + l.valor, 0);
+  const rec = noPer.filter((l) => l.tipo === "pagamento").reduce((s, l) => s + l.valor, 0);
+  // semanas (segunda a domingo), as 6 mais recentes
+  const d0 = new Date(t + "T12:00:00"); const dow = (d0.getDay() + 6) % 7; const seg = addDays(t, -dow);
+  const semanas = [];
+  for (let i = 0; i < 6; i++) {
+    const a = addDays(seg, -7 * i), b = addDays(a, 6);
+    const ls = C.todos().filter((l) => !l.cancelado && l.data >= a && l.data <= b);
+    semanas.push({ a, b, v: ls.filter((l) => l.tipo === "compra").reduce((s, l) => s + l.valor, 0), r: ls.filter((l) => l.tipo === "pagamento").reduce((s, l) => s + l.valor, 0) });
+  }
+  return {
+    title: "Relatórios",
+    body: `
+      <section class="summary"><span class="label">Total a receber</span><strong class="big num">${money(total)}</strong><span class="sub">${plural(devendo.length, "cliente devendo", "clientes devendo")} · ${plural(atraso.length, "em atraso", "em atraso")}</span></section>
+      <h2 class="sec">Clientes em atraso <small>mais de ${cfg.prazoAtraso} dias sem pagar · <button class="btn ghost" style="min-height:0;padding:0" data-action="sheet" data-type="prazo">mudar prazo</button></small></h2>
+      ${atraso.length ? `<div class="list">${atraso.map((c) => `<div class="lrow" style="grid-template-columns:auto 1fr auto">
+          <span class="avatar cli">${initial(c.nome)}</span>
+          <span class="ldesc"><strong>${esc(c.nome)} · <span class="num">${money(C.saldo(c.id))}</span></strong><small>${C.status(c.id).dias} dias sem pagar</small></span>
+          <button class="btn" style="min-height:44px;padding:8px 12px" data-action="sheet" data-type="extrato" data-id="${esc(c.id)}">Cobrar</button></div>`).join("")}</div>` : `<div class="list"><p class="empty">Ninguém em atraso.</p></div>`}
+      <h2 class="sec">Movimento do período</h2>
+      <div class="chips" role="group" aria-label="Período">${[["7", "7 dias"], ["30", "30 dias"], ["mes", "Este mês"], ["tudo", "Tudo"]].map(([k, l]) => `<button class="pick" data-action="per" data-k="${k}" aria-pressed="${per === k}">${l}</button>`).join("")}</div>
+      <div class="stats">
+        <div class="stat"><small>Vendido no fiado</small><strong class="num">${money(vend)}</strong></div>
+        <div class="stat"><small>Recebido</small><strong class="num" style="color:var(--green)">${money(rec)}</strong></div>
+      </div>
+      <h2 class="sec">Por semana</h2>
+      <div class="card tbl-wrap" style="padding:4px 6px"><table class="rep"><thead><tr><th>Semana</th><th>Vendido</th><th>Recebido</th></tr></thead><tbody>
+        ${semanas.map((s) => `<tr><td>${fmtD(s.a)} a ${fmtD(s.b)}</td><td>${money(s.v)}</td><td>${money(s.r)}</td></tr>`).join("")}
+      </tbody></table></div>
+      <h2 class="sec">Quem mais deve</h2>
+      ${devendo.length ? `<div class="list">${devendo.slice(0, 5).map((c) => clienteRow(c)).join("")}</div>` : `<div class="list"><p class="empty">Ninguém devendo.</p></div>`}`,
+  };
+};
+
+V.ajustes = () => {
+  const cfg = C.cfg();
+  if (!S.form.init) S.form = { init: true, nomeLoja: cfg.nomeLoja, nomeDona: cfg.nomeDona, tel: fmtPhone(cfg.telefoneDona), prazo: String(cfg.prazoAtraso) };
+  return {
+    title: "Ajustes", back: true,
+    foot: `<button class="btn primary block" data-action="saveAjustes">${icon("check")}Salvar ajustes</button>`,
+    body: `
+      <div class="field"><label for="aj-loja">Nome da lanchonete</label><input id="aj-loja" class="input" data-f="nomeLoja" value="${esc(S.form.nomeLoja)}"></div>
+      <div class="field"><label for="aj-dona">Seu nome</label><input id="aj-dona" class="input" data-f="nomeDona" value="${esc(S.form.nomeDona)}"><span class="hint">Aparece no extrato como “anotado por”.</span></div>
+      <div class="field"><label for="aj-tel">Seu celular</label><input id="aj-tel" class="input" type="tel" data-f="tel" value="${esc(S.form.tel)}"><span class="hint">É com ele que você entra no app.</span></div>
+      <div class="field"><label for="aj-prazo">Prazo para considerar atraso (dias)</label><input id="aj-prazo" class="input" inputmode="numeric" data-f="prazo" value="${esc(S.form.prazo)}"></div>
+      ${S.form.err ? `<p class="err" role="alert">${esc(S.form.err)}</p>` : ""}
+      <p class="fine">Dados guardados ${Store.mode === "db" ? "no banco do aplicativo, compartilhado entre os seus aparelhos" : "só neste aparelho"}.</p>
+      ${Store.mode === "local" ? `<button class="btn danger block" data-action="resetLocal">Voltar aos dados de exemplo</button>` : ""}`,
+  };
+};
+
+/* ============ telas do cliente ============ */
+V.saldo = () => {
+  const c = C.cliente(S.sess.clienteId); const cfg = C.cfg();
+  const ex = C.extrato(c.id); const up = C.ultimoPag(c.id);
+  const depois = up ? ex.filter((l) => l.tipo === "compra" && !l.cancelado && C.chrono(l, up) > 0) : ex.filter((l) => l.tipo === "compra" && !l.cancelado);
+  const minhas = C.todos().filter((l) => l.clienteId === c.id && l.contestacao).sort((a, b) => String(b.contestacao.em).localeCompare(String(a.contestacao.em)));
+  const ultima = ex[ex.length - 1];
+  return {
+    title: "Meu saldo",
+    body: `
+      ${paperCard(c, true)}
+      <p class="muted small" style="margin:-6px 0 0">na ${esc(cfg.nomeLoja)}${ultima ? ` · última anotação em ${fmtD(ultima.data)}` : ""}</p>
+      <div class="stats">
+        <div class="stat"><small>${up ? `Compras desde ${fmtD(up.data)}` : "Compras no fiado"}</small><strong class="num">${money(depois.reduce((s, l) => s + l.valor, 0))}</strong><div class="muted small">${plural(depois.length, "anotação", "anotações")}</div></div>
+        <div class="stat"><small>Último pagamento</small><strong class="num" style="color:var(--green)">${up ? money(up.valor) : "—"}</strong><div class="muted small">${up ? `${fmtD(up.data)} · ${esc(up.forma || "")}` : "nenhum ainda"}</div></div>
+      </div>
+      ${minhas.map((l) => `<button class="alert" style="${l.contestacao.status === "aberta" ? "" : "background:var(--surface-2)"}" data-action="go" data-view="detalhe" data-id="${esc(l.id)}">${icon("flag")}<div><strong>${l.contestacao.status === "aberta" ? "Contestação enviada" : l.contestacao.status === "aceita" ? "A dona aceitou sua contestação" : "A dona respondeu sua contestação"}</strong><span>${esc(C.desc(l))} de ${fmtD(l.data)}${l.contestacao.status === "aberta" ? " · aguardando resposta" : ""}</span></div></button>`).join("")}
+      <h2 class="sec">Últimas anotações</h2>
+      ${ex.length ? `<div class="list">${ex.slice(-3).reverse().map((l) => lancRow(l, { saldo: true, view: "detalhe" })).join("")}</div>` : `<div class="list"><p class="empty">Nenhuma anotação.</p></div>`}
+      <button class="btn block" data-action="tab" data-view="extrato">${icon("list")}Ver extrato completo</button>`,
+  };
+};
+V.extrato = () => {
+  const c = C.cliente(S.sess.clienteId);
+  return {
+    title: "Extrato",
+    body: `<p class="muted small">Cada compra e cada pagamento anotado pela dona, com o saldo depois de cada um. Algo errado? Toque na anotação para contestar.</p>
+      ${extratoList(c.id, "detalhe")}`,
+  };
+};
+V.detalhe = (v) => {
+  const l = C.lanc(v.id); if (!l || l.clienteId !== S.sess.clienteId) return notFound();
+  return {
+    title: "Anotação", back: true,
+    body: `${lancDetalhe(l, true)}
+      ${!l.contestacao && !l.cancelado ? `<button class="btn block" data-action="go" data-view="contestar" data-id="${esc(l.id)}">${icon("flag")}Contestar esta anotação</button><p class="fine">Use se você não reconhece esta anotação ou se o valor está errado. A dona recebe o aviso.</p>` : ""}`,
+  };
+};
+V.contestar = (v) => {
+  const l = C.lanc(v.id); if (!l || l.clienteId !== S.sess.clienteId) return notFound();
+  return {
+    title: "Contestar", back: true,
+    foot: `<button class="btn primary block" data-action="enviarContest">${icon("send")}Enviar para a dona</button>`,
+    body: `
+      <div class="card"><span class="eyebrow">${l.tipo === "pagamento" ? "Pagamento" : "Compra"} de ${fmtD(l.data)}</span><strong style="font-family:var(--display);font-size:20px">${esc(C.desc(l))} · ${money(l.valor)}</strong></div>
+      <fieldset style="border:0;padding:0;margin:0"><legend class="legend" style="margin-bottom:8px">O que está errado?</legend>
+        <div class="radio-list">${MOTIVOS.map((m) => `<label><input type="radio" name="motivo" value="${esc(m)}" data-f="motivo" ${S.form.motivo === m ? "checked" : ""}>${esc(m)}</label>`).join("")}</div></fieldset>
+      <div class="field"><label for="ct-texto">Conte o que aconteceu <span class="muted">(opcional)</span></label><textarea id="ct-texto" class="input" data-f="texto" placeholder="Ex.: nesse dia eu só comprei o suco.">${esc(S.form.texto || "")}</textarea></div>
+      ${S.form.err ? `<p class="err" role="alert">${esc(S.form.err)}</p>` : ""}`,
+  };
+};
+V.falar = () => {
+  const c = C.cliente(S.sess.clienteId); const cfg = C.cfg();
+  const msg = `Olá! Aqui é o ${c.nome}, sobre o meu fiado na ${cfg.nomeLoja}.`;
+  return {
+    title: "Falar com a dona",
+    body: `
+      <section class="card" style="display:flex;gap:14px;align-items:center"><span class="avatar lg">${initial(cfg.nomeDona)}</span><div><strong style="font-family:var(--display);font-size:20px">${esc(cfg.nomeDona)}</strong><div class="muted">${esc(cfg.nomeLoja)} · ${esc(fmtPhone(cfg.telefoneDona))}</div></div></section>
+      <a class="btn green block" href="${esc(waLink(cfg.telefoneDona, msg))}" target="_blank" rel="noopener">${icon("chat")}Mandar mensagem no WhatsApp</a>
+      <a class="btn block" href="tel:${esc(digits(cfg.telefoneDona))}">${icon("phone")}Ligar</a>
+      <section class="card" style="display:grid;gap:6px;background:var(--surface-2)"><h3 style="font-size:16px">Seus dados</h3>
+        <p class="small muted" style="margin:0">A lanchonete guarda só o seu nome, o seu celular e as anotações do fiado. Eles servem apenas para controlar o que você comprou e pagou. Para corrigir ou apagar seus dados, fale com a dona.</p></section>`,
+  };
+};
+
+function notFound() { return { title: "Não encontrado", back: true, body: `<div class="list"><p class="empty">Esta anotação ou cliente não existe mais.</p></div>` }; }
+
+/* ============ login ============ */
+function loginView() {
+  const L = S.login, cfg = C.cfg();
+  const cls = C.clientes().sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  if (L.step === "code") {
+    return `<div class="login">
+      <button class="btn ghost" style="align-self:flex-start;padding-left:0" data-action="loginBack">${icon("back")}Trocar número</button>
+      <div class="brand"><h1 style="font-size:30px">Digite o código</h1><p>Enviamos um código por SMS para <strong>${esc(fmtPhone(L.tel))}</strong>.</p></div>
+      <div class="field"><label for="lg-code">Código de 4 números</label><input id="lg-code" class="input code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="4" data-lf="code" value="${esc(L.code)}"></div>
+      ${L.err ? `<p class="err" role="alert">${esc(L.err)}</p>` : ""}
+      <button class="btn primary block" data-action="loginCode">Entrar</button>
+      <p class="fine">Protótipo: nenhum SMS é enviado. Use o código <strong>${DEMO_CODE}</strong>.</p>
+    </div>`;
+  }
+  return `<div class="login">
+    <div class="brand">
+      <span class="eyebrow">${esc(cfg.nomeLoja)}</span>
+      <h1>Caderno do Fiado</h1>
+      <p>A dona anota no celular. O cliente confere o saldo quando quiser.</p>
+    </div>
+    <div class="paper mini-page" aria-hidden="true"><div><strong>JOÃO</strong></div><div><s>15/09 — coxinha — 7,00</s></div><div><s>16/09 — pagou 5,00</s></div><div style="color:var(--blue)">agora: saldo sempre em dia →</div></div>
+    <div class="field"><label for="lg-tel">Seu número de celular</label><input id="lg-tel" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="(95) 90000-0000" data-lf="tel" value="${esc(L.tel)}"></div>
+    ${L.err ? `<p class="err" role="alert">${esc(L.err)}</p>` : ""}
+    <button class="btn primary block" data-action="loginTel">Receber código por SMS</button>
+    <p class="fine">É cliente? Você entra com o número que a dona cadastrou e mandou no convite.</p>
+    <div class="demo" aria-label="Acesso rápido para teste">
+      <h2 class="sec" style="font-size:15px">Acesso rápido do protótipo</h2>
+      <button class="btn primary" data-action="demo" data-perfil="dona"><span class="avatar" style="background:rgba(255,255,255,.2);color:inherit">${initial(cfg.nomeDona)}</span><span>Entrar como a dona<small>${esc(cfg.nomeDona)} · ${esc(fmtPhone(cfg.telefoneDona))}</small></span></button>
+      ${cls.map((c) => `<button class="btn" data-action="demo" data-perfil="cliente" data-id="${esc(c.id)}"><span class="avatar cli">${initial(c.nome)}</span><span>Entrar como ${esc(c.nome)} (cliente)<small>${esc(fmtPhone(c.telefone))}</small></span></button>`).join("")}
+    </div>
+    <p class="fine">Protótipo do Projeto Final — Do Caderno do Fiado ao Aplicativo Digital (ITEAM). ${Store.mode === "db" ? "Os dados ficam salvos e aparecem em todos os aparelhos em que você abrir este link." : "Os dados ficam salvos só neste navegador."}</p>
+  </div>`;
+}
+
+function setupView() {
+  return `<div class="setup">
+    <div class="brand"><span class="eyebrow">Primeiro acesso</span><h1>Caderno do Fiado</h1><p>O caderno está vazio. Como você quer começar?</p></div>
+    <button class="btn primary block tall" data-action="seed" data-kind="exemplo">Começar com o exemplo do caderno<small style="font-weight:500;opacity:.85">João, Maria e Carlos, com o cardápio</small></button>
+    <button class="btn block tall" data-action="seed" data-kind="zero">Começar do zero<small style="font-weight:500" class="muted">só o cardápio básico, sem clientes</small></button>
+  </div>`;
+}
+
+/* ============ folhas (bottom sheets) ============ */
+const SHEETS = {
+  perfil() {
+    const d = S.sess.perfil === "dona";
+    const nome = d ? C.cfg().nomeDona : C.cliente(S.sess.clienteId)?.nome;
+    return `<h2 id="sheet-t">${esc(nome)}</h2><p class="muted" style="margin:0">Você entrou como ${d ? "dona da lanchonete" : "cliente"}.</p>
+      ${d ? `<button class="btn block" data-action="goAjustes">${icon("sliders")}Ajustes da lanchonete</button>` : ""}
+      <button class="btn danger block" data-action="sair">${icon("logout")}Sair</button>
+      <button class="btn ghost block" data-action="closeSheet">Fechar</button>`;
+  },
+  extrato(sh) {
+    const c = C.cliente(sh.id); if (!c) return "";
+    const txt = textoExtrato(c.id);
+    return `<h2 id="sheet-t">Enviar extrato para ${esc(c.nome)}</h2>
+      <textarea id="sh-text" class="input" rows="9" readonly>${esc(txt)}</textarea>
+      <a class="btn green block" href="${esc(waLink(c.telefone, txt))}" target="_blank" rel="noopener">${icon("chat")}Abrir no WhatsApp</a>
+      <button class="btn block" data-action="copy" data-target="sh-text">${icon("copy")}Copiar texto</button>
+      <button class="btn ghost block" data-action="closeSheet">Fechar</button>`;
+  },
+  convite(sh) {
+    const c = C.cliente(sh.id); if (!c) return "";
+    const txt = textoConvite(c.id);
+    return `<h2 id="sheet-t">Convite para ${esc(c.nome)}</h2>
+      <textarea id="sh-text" class="input" rows="7" readonly>${esc(txt)}</textarea>
+      <a class="btn green block" href="${esc(waLink(c.telefone, txt))}" target="_blank" rel="noopener" data-action="conviteEnviado" data-id="${esc(c.id)}">${icon("chat")}Enviar pelo WhatsApp</a>
+      <button class="btn block" data-action="copy" data-target="sh-text">${icon("copy")}Copiar texto</button>
+      <button class="btn ghost block" data-action="closeSheet">Fechar</button>`;
+  },
+  cancelar(sh) {
+    const l = C.lanc(sh.id); if (!l) return "";
+    return `<h2 id="sheet-t">Cancelar anotação?</h2>
+      <p style="margin:0">${esc(C.desc(l))} de ${fmtD(l.data)} · <strong>${money(l.valor)}</strong>. O saldo de ${esc(C.cliente(l.clienteId)?.nome || "")} será recalculado.</p>
+      <div class="field"><label for="sh-motivo">Motivo</label><input id="sh-motivo" class="input" data-sf="motivo" value="${esc(S.sheet.motivo || "")}" placeholder="Ex.: anotei no cliente errado"></div>
+      <button class="btn danger block" data-action="confirmCancel" data-id="${esc(l.id)}">Cancelar anotação</button>
+      <button class="btn ghost block" data-action="closeSheet">Voltar</button>`;
+  },
+  prazo() {
+    return `<h2 id="sheet-t">Prazo para atraso</h2>
+      <div class="field"><label for="sh-prazo">Considerar em atraso depois de quantos dias sem pagar?</label><input id="sh-prazo" class="input" inputmode="numeric" data-sf="prazo" value="${esc(S.sheet.prazo ?? C.cfg().prazoAtraso)}"></div>
+      <button class="btn primary block" data-action="savePrazo">Salvar</button>
+      <button class="btn ghost block" data-action="closeSheet">Fechar</button>`;
+  },
+};
+
+/* ============ desenho da tela ============ */
+let pending = false;
+const TABS = {
+  dona: [["inicio", "Início", "home"], ["clientes", "Clientes", "users"], ["produtos", "Produtos", "box"], ["relatorios", "Relatórios", "chart"]],
+  cliente: [["saldo", "Meu saldo", "wallet"], ["extrato", "Extrato", "list"], ["falar", "Falar com a dona", "chat"]],
+};
+function editing() { const a = document.activeElement; return a && a.closest && a.closest("#app") && a.matches("input:not([type=radio]):not([type=checkbox]),textarea,select"); }
+
+function render() {
+  if (editing()) { pending = true; return; }
+  pending = false;
+  const app = $("#app");
+  if (!Store.ready) { app.innerHTML = `<div class="loading">Abrindo o caderno…</div>`; return; }
+  if (Store.empty) { app.innerHTML = setupView(); return; }
+  if (S.sess && S.sess.perfil === "cliente" && !C.cliente(S.sess.clienteId)) { S.sess = null; saveSess(); }
+  if (!S.sess) { app.innerHTML = loginView(); return; }
+  if (!S.stack.length) S.stack = [{ name: S.sess.perfil === "cliente" ? "saldo" : "inicio" }];
+  const v = cur();
+  const donaViews = ["inicio", "clientes", "escolher", "ficha", "novoCliente", "convite", "compra", "pagamento", "lanc", "produtos", "produtoForm", "relatorios", "ajustes"];
+  const cliViews = ["saldo", "extrato", "detalhe", "contestar", "falar"];
+  if (!(S.sess.perfil === "dona" ? donaViews : cliViews).includes(v.name)) { S.stack = [{ name: S.sess.perfil === "cliente" ? "saldo" : "inicio" }]; }
+  const out = V[cur().name](cur());
+  const tabs = TABS[S.sess.perfil];
+  const topName = S.stack[0].name;
+  const isTop = S.stack.length === 1 && !out.back;
+  const cfg = C.cfg();
+  const whoName = S.sess.perfil === "dona" ? cfg.nomeDona : C.cliente(S.sess.clienteId).nome;
+  const nAbertas = S.sess.perfil === "dona" ? C.abertas().length : 0;
+  app.innerHTML = `<div class="app ${isTop ? "has-nav" : ""} ${out.foot ? "has-foot" : ""}">
+    <header class="bar" id="bar">
+      ${!isTop ? `<button class="icon-btn" data-action="back" aria-label="Voltar">${icon("back", 24)}</button>` : ""}
+      <div class="bar-title"><span class="eyebrow">${esc(cfg.nomeLoja)}</span><h1>${esc(out.title)}</h1></div>
+      <button class="who" data-action="sheet" data-type="perfil" aria-label="Perfil: ${esc(whoName)}"><span class="avatar ${S.sess.perfil === "cliente" ? "cli" : ""}">${initial(whoName)}</span><span>${S.sess.perfil === "dona" ? "Dona" : esc(whoName)}</span></button>
+    </header>
+    ${Store.readOnly ? `<div class="banner">Você pode ver, mas não alterar estes dados.</div>` : ""}
+    <main class="screen" id="screen">${out.body}</main>
+    ${out.foot ? `<div class="foot">${out.foot}</div>` : ""}
+    ${isTop ? `<nav class="tabs" aria-label="Menu principal">${tabs.map(([k, l, ic]) => `<button class="tab" data-action="tab" data-view="${k}" ${topName === k ? 'aria-current="page"' : ""}>${icon(ic, 24)}<span>${l}</span>${k === "inicio" && nAbertas ? `<span class="dot">${nAbertas}</span>` : ""}</button>`).join("")}</nav>` : ""}
+  </div>
+  ${S.sheet && SHEETS[S.sheet.type] ? `<div class="sheet-wrap" data-action="closeSheet"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t" data-action="noop">${SHEETS[S.sheet.type](S.sheet)}</div></div>` : ""}`;
+  onScroll();
+}
+function onScroll() { const b = $("#bar"); if (b) b.classList.toggle("scrolled", window.scrollY > 4); }
+window.addEventListener("scroll", onScroll, { passive: true });
+
+/* ============ ações ============ */
+const A = {
+  noop() {},
+  back() { back(); },
+  go(d) { go({ name: d.view, id: d.id, acao: d.acao }); },
+  replace(d) { replace({ name: d.view, id: d.id }); },
+  tab(d) { resetTo({ name: d.view }); },
+  sheet(d) { S.sheet = { type: d.type, id: d.id }; render(); setTimeout(() => { const f = $(".sheet input, .sheet .btn"); if (f) f.focus(); }, 30); },
+  closeSheet() { S.sheet = null; render(); },
+  sair() { sair(); },
+  goAjustes() { S.sheet = null; go({ name: "ajustes" }); },
+  filtro(d) { S.form.filtro = d.k; render(); },
+  per(d) { S.form.per = d.k; render(); },
+  async copy(d) {
+    const el = document.getElementById(d.target); if (!el) return;
+    try { await navigator.clipboard.writeText(el.value); toast("Texto copiado."); }
+    catch (e) { el.focus(); el.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e2) {} toast(ok ? "Texto copiado." : "Texto selecionado: copie com o menu do celular."); }
+  },
+  conviteEnviado(d) { if (!Store.readOnly) Store.patch("clientes", d.id, { conviteEm: new Date().toISOString() }); return "keep"; },
+
+  /* login */
+  loginTel() {
+    const tel = digits(S.login.tel);
+    if (tel.length < 10) { S.login.err = "Digite o celular com DDD, por exemplo (95) 98111-0001."; return render(); }
+    const cfg = C.cfg();
+    const eDona = digits(cfg.telefoneDona) === tel;
+    const cli = C.clientes().find((c) => digits(c.telefone) === tel);
+    if (!eDona && !cli) { S.login.err = "Este número não está no caderno. Peça para a dona da lanchonete cadastrar você e mandar o convite."; return render(); }
+    S.login = { step: "code", tel, code: "", err: "", perfil: eDona ? "dona" : "cliente", clienteId: cli ? cli.id : null };
+    render(); setTimeout(() => $("#lg-code")?.focus(), 30);
+  },
+  loginCode() {
+    if (S.login.code.trim() !== DEMO_CODE) { S.login.err = "Código errado. Confira o SMS e tente de novo."; return render(); }
+    entrar(S.login.perfil === "dona" ? { perfil: "dona" } : { perfil: "cliente", clienteId: S.login.clienteId });
+  },
+  loginBack() { S.login = { step: "tel", tel: S.login.tel, code: "", err: "" }; render(); },
+  demo(d) { entrar(d.perfil === "dona" ? { perfil: "dona" } : { perfil: "cliente", clienteId: d.id }); },
+  async seed(d) { const ok = await Store.loadAll(d.kind === "zero" ? basico() : exemplo()); if (ok) toast("Caderno pronto."); },
+
+  /* dona */
+  qty(d) {
+    const q = S.form.qtd = S.form.qtd || {};
+    q[d.pid] = Math.max(0, (q[d.pid] || 0) + Number(d.d));
+    const o = document.getElementById("q-" + d.pid); if (o) o.textContent = q[d.pid];
+    const r = document.getElementById("pr-" + d.pid); if (r) r.classList.toggle("sel", q[d.pid] > 0);
+    patchCompra();
+  },
+  async saveCompra() {
+    if (Store.readOnly) return;
+    const v = cur(); const r = compraResumo();
+    if (!(r.total > 0)) return;
+    const c = C.cliente(v.id);
+    const id = Store.newId("lancamentos");
+    const body = { clienteId: v.id, tipo: "compra", data: S.form.data || todayISO(), itens: r.itens, valor: r.total, criadoEm: new Date().toISOString(), autor: "dona" };
+    if (await Store.put("lancamentos", id, body)) { S.stack.pop(); S.form = {}; render(); toast(`Anotado: ${money(r.total)} para ${c.nome}. Saldo: ${money(C.saldo(v.id))}.`); }
+  },
+  pvalor(d) { S.form.valor = toInput(Number(d.v)); const i = $("#p-valor"); if (i) i.value = S.form.valor; patchPag(); },
+  async savePag() {
+    if (Store.readOnly) return;
+    const v = cur(); const val = parseMoney(S.form.valor);
+    if (!(val > 0)) return;
+    const c = C.cliente(v.id);
+    const id = Store.newId("lancamentos");
+    const body = { clienteId: v.id, tipo: "pagamento", data: S.form.data || todayISO(), valor: val, forma: S.form.forma || "Dinheiro", criadoEm: new Date().toISOString(), autor: "dona" };
+    if (await Store.put("lancamentos", id, body)) { S.stack.pop(); S.form = {}; render(); const s = C.saldo(v.id); toast(`Pagamento de ${money(val)} registrado. ${s > 0 ? `${c.nome} ainda deve ${money(s)}.` : `${c.nome} está em dia.`}`); }
+  },
+  async saveCliente() {
+    if (Store.readOnly) return;
+    const f = S.form; const nome = (f.nome || "").trim(); const tel = digits(f.tel);
+    let err = "";
+    if (!nome) err = "Escreva o nome do cliente.";
+    else if (tel.length < 10 || tel.length > 11) err = "Digite o celular com DDD (10 ou 11 números).";
+    else if (C.clientes().some((c) => digits(c.telefone) === tel) || digits(C.cfg().telefoneDona) === tel) err = "Já existe alguém com este celular no caderno.";
+    else if (!f.ok) err = "Confirme que o cliente concordou em guardar os dados.";
+    if (err) { S.form.err = err; return render(); }
+    const id = Store.newId("clientes");
+    const body = { nome, apelido: (f.apelido || "").trim(), telefone: tel, criadoEm: new Date().toISOString(), consentimento: true };
+    if (await Store.put("clientes", id, body)) replace({ name: "convite", id });
+  },
+  async aceitar() {
+    const l = C.lanc(cur().id); if (!l || Store.readOnly) return;
+    const resp = (S.form.resp || "").trim() || "Você tem razão. Cancelei esta anotação.";
+    const ok = await Store.patch("lancamentos", l.id, { cancelado: true, canceladoEm: new Date().toISOString(), motivoCancelamento: "Contestação aceita", contestacao: Object.assign({}, l.contestacao, { status: "aceita", resposta: resp, respondidaEm: new Date().toISOString() }) });
+    if (ok) { S.form = {}; render(); toast(`Anotação cancelada. Saldo de ${C.cliente(l.clienteId).nome}: ${money(C.saldo(l.clienteId))}.`); }
+  },
+  async manter() {
+    const l = C.lanc(cur().id); if (!l || Store.readOnly) return;
+    const resp = (S.form.resp || "").trim();
+    if (!resp) { toast("Escreva uma resposta explicando para o cliente."); $("#ct-resp")?.focus(); return; }
+    const ok = await Store.patch("lancamentos", l.id, { contestacao: Object.assign({}, l.contestacao, { status: "respondida", resposta: resp, respondidaEm: new Date().toISOString() }) });
+    if (ok) { S.form = {}; render(); toast("Resposta enviada. A anotação foi mantida."); }
+  },
+  async confirmCancel(d) {
+    const l = C.lanc(d.id); if (!l || Store.readOnly) return;
+    const motivo = (S.sheet.motivo || "").trim() || "Cancelado pela dona";
+    const ok = await Store.patch("lancamentos", l.id, { cancelado: true, canceladoEm: new Date().toISOString(), motivoCancelamento: motivo });
+    if (ok) { S.sheet = null; render(); toast(`Anotação cancelada. Saldo: ${money(C.saldo(l.clienteId))}.`); }
+  },
+  async saveProduto() {
+    if (Store.readOnly) return;
+    const v = cur(); const f = S.form; const nome = (f.nome || "").trim(); const preco = parseMoney(f.preco);
+    if (!nome) { S.form.err = "Escreva o nome do produto."; return render(); }
+    if (!(preco > 0)) { S.form.err = "Digite o preço, por exemplo 7,00."; return render(); }
+    const id = v.id || Store.newId("produtos");
+    if (await Store.put("produtos", id, { nome, categoria: f.categoria || "Outros", preco, ativo: !!f.ativo })) { back(); toast(`${nome} salvo: ${money(preco)}.`); }
+  },
+  async savePrazo() {
+    const n = parseInt(S.sheet.prazo ?? C.cfg().prazoAtraso, 10);
+    if (!(n >= 1 && n <= 365)) { toast("Digite um prazo entre 1 e 365 dias."); return; }
+    if (await Store.put("config", "loja", Object.assign({}, C.cfg(), { prazoAtraso: n }))) { S.sheet = null; render(); toast(`Prazo de atraso: ${n} dias.`); }
+  },
+  async saveAjustes() {
+    const f = S.form; const tel = digits(f.tel); const n = parseInt(f.prazo, 10);
+    let err = "";
+    if (!(f.nomeLoja || "").trim() || !(f.nomeDona || "").trim()) err = "Preencha o nome da lanchonete e o seu nome.";
+    else if (tel.length < 10 || tel.length > 11) err = "Digite o seu celular com DDD.";
+    else if (C.clientes().some((c) => digits(c.telefone) === tel)) err = "Este celular já é de um cliente.";
+    else if (!(n >= 1 && n <= 365)) err = "O prazo precisa ficar entre 1 e 365 dias.";
+    if (err) { S.form.err = err; return render(); }
+    if (await Store.put("config", "loja", { nomeLoja: f.nomeLoja.trim(), nomeDona: f.nomeDona.trim(), telefoneDona: tel, prazoAtraso: n })) { back(); toast("Ajustes salvos."); }
+  },
+  resetLocal() { if (confirm("Apagar tudo o que foi anotado neste aparelho e voltar ao exemplo do caderno?")) { Store.loadAll(exemplo()); S.stack = []; home(); toast("Dados de exemplo restaurados."); } },
+
+  /* cliente */
+  async enviarContest() {
+    const l = C.lanc(cur().id); if (!l || Store.readOnly) return;
+    if (!S.form.motivo) { S.form.err = "Escolha o que está errado."; return render(); }
+    const ok = await Store.patch("lancamentos", l.id, { contestacao: { motivo: S.form.motivo, texto: (S.form.texto || "").trim(), em: new Date().toISOString(), status: "aberta" } });
+    if (ok) { S.stack.pop(); S.form = {}; render(); toast("Enviado. A dona vai conferir e responder aqui."); }
+  },
+};
+
+document.addEventListener("click", (ev) => {
+  const el = ev.target.closest("[data-action]");
+  if (!el) return;
+  const name = el.dataset.action;
+  if (name === "noop") return;
+  const fn = A[name]; if (!fn) return;
+  if (editing()) document.activeElement.blur();
+  const isLink = el.tagName === "A";
+  if (!isLink) ev.preventDefault();
+  fn(el.dataset, el, ev);
+});
+
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (el.dataset.lf) { S.login[el.dataset.lf] = el.value; return; }
+  if (el.dataset.sf) { S.sheet[el.dataset.sf] = el.value; return; }
+  const k = el.dataset.f; if (!k) return;
+  S.form[k] = el.type === "checkbox" ? el.checked : el.value;
+  const name = cur().name;
+  if (name === "compra") patchCompra();
+  else if (name === "pagamento") patchPag();
+  else if (name === "clientes" && k === "busca") { const l = $("#cl-list"); if (l) l.innerHTML = clientesList(); }
+  else if (name === "escolher" && k === "busca") { const l = $("#esc-list"); if (l) l.innerHTML = escolherList(cur()); }
+});
+document.addEventListener("change", (ev) => {
+  const el = ev.target; const k = el.dataset.f; if (!k) return;
+  S.form[k] = el.type === "checkbox" ? el.checked : el.value;
+  if (el.type === "radio" && S.form.err) { S.form.err = ""; }
+});
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape" && S.sheet) { S.sheet = null; render(); }
+  if (ev.key === "Enter" && ev.target.matches("input")) {
+    const id = ev.target.id;
+    if (id === "lg-tel") { ev.preventDefault(); A.loginTel(); }
+    else if (id === "lg-code") { ev.preventDefault(); A.loginCode(); }
+  }
+});
+document.addEventListener("focusout", () => { setTimeout(() => { if (pending && !editing()) render(); }, 0); });
+
+Store.subs.push(render);
+loadSess();
+render();
+Store.start();
+})();
+</script>
+
+</body>
+</html>
